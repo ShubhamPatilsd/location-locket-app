@@ -1,6 +1,8 @@
 import * as React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
+import { styles } from "../components/Styles";
+import { Link, router } from "expo-router";
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -35,44 +37,58 @@ export default function SignUpScreen() {
     try {
       const completeSignUp = await signUp.attemptEmailAddressVerification({ code });
       await setActive({ session: completeSignUp.createdSessionId });
+      router.push("/");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
     }
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       {!pendingVerification && (
-        <View>
-          <View>
+        <>
+          <View style={styles.inputView}>
             <TextInput
               autoCapitalize="none"
               value={firstName}
+              style={styles.textInput}
               placeholder="First Name..."
               onChangeText={(firstName) => setFirstName(firstName)}
             />
           </View>
-          <View>
+          <View style={styles.inputView}>
             <TextInput
               autoCapitalize="none"
               value={lastName}
+              style={styles.textInput}
               placeholder="Last Name..."
               onChangeText={(lastName) => setLastName(lastName)}
             />
           </View>
-          <View>
+          <View style={styles.inputView}>
             <TextInput
               autoCapitalize="none"
               value={emailAddress}
+              style={styles.textInput}
               placeholder="Email..."
               onChangeText={(email) => setEmailAddress(email)}
             />
           </View>
 
-          <TouchableOpacity onPress={onSignUpPress}>
-            <Text>Sign up</Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={onSignUpPress}>
+            <Text style={styles.primaryButtonText}>Sign up</Text>
           </TouchableOpacity>
-        </View>
+
+          <View style={styles.footer}>
+            <Text>Have an account?</Text>
+
+            <Link href="/signIn" asChild>
+              <Pressable style={styles.secondaryButton}>
+                <Text style={styles.secondaryButtonText}>Sign in</Text>
+              </Pressable>
+            </Link>
+          </View>
+        </>
       )}
       {pendingVerification && (
         <View>

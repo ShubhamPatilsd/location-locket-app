@@ -1,6 +1,8 @@
 import React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSignIn } from "@clerk/clerk-expo";
+import { styles } from "../components/Styles";
+import { Link, router } from "expo-router";
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -12,11 +14,17 @@ export default function SignInScreen() {
     if (!isLoaded) return;
 
     try {
-      await signIn.create({ identifier: emailAddress });
-      await signIn.prepareFirstFactor({ strategy: "email_code", emailAddressId: emailAddress });
+      const auth = await signIn.create({ identifier: emailAddress });
+
+      console.log(auth.supportedFirstFactors, auth.supportedIdentifiers);
+
+      await auth.prepareFirstFactor({
+        strategy: "email_code",
+        identifier: auth.supportedFirstFactors[0].email,
+      });
       setVerifying(true);
     } catch (err: any) {
-      console.log(err);
+      console.error(JSON.stringify(err, null, 2));
     }
   };
 
@@ -31,28 +39,40 @@ export default function SignInScreen() {
       }
 
       await setActive({ session: completeSignIn.createdSessionId });
+      router.push("/");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
     }
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       {!verifying && (
-        <View>
-          <View>
+        <>
+          <View style={styles.inputView}>
             <TextInput
               autoCapitalize="none"
               value={emailAddress}
+              style={styles.textInput}
               placeholder="Email..."
               onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
             />
           </View>
 
-          <TouchableOpacity onPress={onSignInPress}>
-            <Text>Sign in</Text>
+          <TouchableOpacity style={styles.primaryButton} onPress={onSignInPress}>
+            <Text style={styles.primaryButtonText}>Sign in</Text>
           </TouchableOpacity>
-        </View>
+
+          <View style={styles.footer}>
+            <Text>Don't have an account?</Text>
+
+            <Link href="/signUp" asChild>
+              <Pressable style={styles.secondaryButton}>
+                <Text style={styles.secondaryButtonText}>Sign up</Text>
+              </Pressable>
+            </Link>
+          </View>
+        </>
       )}
       {verifying && (
         <View>
