@@ -16,12 +16,12 @@ export default function SignInScreen() {
     try {
       const auth = await signIn.create({ identifier: emailAddress });
 
-      console.log(auth.supportedFirstFactors, auth.supportedIdentifiers);
-
       await auth.prepareFirstFactor({
         strategy: "email_code",
-        identifier: auth.supportedFirstFactors[0].email,
+        // @ts-expect-error
+        emailAddressId: auth.supportedFirstFactors[0].emailAddressId,
       });
+
       setVerifying(true);
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));

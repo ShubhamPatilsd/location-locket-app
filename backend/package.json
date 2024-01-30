@@ -1,0 +1,37 @@
+{
+  "name": "powersync-nodejs-backend-todolist-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "author": "Mike Barnes <michael@journeyapps.com>",
+  "scripts": {
+    "start": "yarn build && pm2 start --no-daemon",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.ts",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "build": "rimraf build && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.8.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "firebase-admin": "^11.11.0",
+    "jose": "^5.1.0",
+    "pg": "^8.11.3",
+    "pm2": "^5.3.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.10",
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.0.3",
+    "prisma": "^5.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

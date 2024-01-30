@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String        @id
+  firstName         String
+  lastName          String
+  email             String
+  profilePicture    String
+  lastKnownLocation String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime
+  GroupToUser       GroupToUser[]
+  Post              Post[]
+
+  @@index([id])
+}
+
+model Group {
+  id          String        @id
+  name        String
+  code        Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  GroupToUser GroupToUser[]
+  Post        Post[]
+
+  @@index([id])
+}
+
+model GroupToUser {
+  groupId String
+  userId  String
+
+  Group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  User  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+}
+
+model Post {
+  id         String @id
+  frontImage String
+  backImage  String
+  caption    String
+  location   String
+
+  authorId  String
+  groupId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  Group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([id])
+}

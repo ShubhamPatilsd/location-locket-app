@@ -6,10 +6,12 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "prebuild": "npx electric-sql generate"
   },
   "dependencies": {
     "@clerk/clerk-expo": "^0.20.1",
+    "electric-sql": "^0.9.1",
     "expo": "~50.0.2",
     "expo-auth-session": "^5.4.0",
     "expo-constants": "~15.4.5",
