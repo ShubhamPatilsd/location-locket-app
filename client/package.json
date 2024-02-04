@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@clerk/clerk-expo": "^0.20.1",
+    "@clerk/nextjs": "^4.29.5",
     "@expo/config-plugins": "~7.8.0",
     "@journeyapps/powersync-sdk-react-native": "^1.2.0",
     "@journeyapps/react-native-quick-sqlite": "^1.1.1",
