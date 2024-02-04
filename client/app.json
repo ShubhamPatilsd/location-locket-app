@@ -1,8 +1,9 @@
 {
-  "scheme": "locket",
+  "scheme": "memoir",
   "expo": {
-    "name": "locket-location",
-    "slug": "locket-location",
+    "name": "Memoir",
+    "slug": "memoir",
+    "scheme": "memoir",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
