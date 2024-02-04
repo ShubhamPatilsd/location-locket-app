@@ -1,7 +1,9 @@
+import { Clerk } from "@clerk/clerk-sdk-node";
 import express from "express";
 import { SignJWT, importJWK } from "jose";
 
 const router = express.Router();
+const clerkClient = Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
 
 /**
  * Get the JWT token that PowerSync will use to authenticate the user
@@ -13,40 +15,34 @@ router.get("/token", async (req, res) => {
     const userToken = req.headers.authorization.split(" ")[1];
     if (!userToken) return res.status(401);
 
-    // TODO: Verify the token with Clerk
-    // const decodedToken = await appAuth.verifyIdToken(userToken);
+    const payload = await clerkClient.verifyToken(userToken);
 
-    // TODO: Get the user ID from the decoded token, send it to PowerSync
-    //   if (decodedToken) {
-    //     // If token is valid, decodedToken has all the user info
-    //     const uid = decodedToken.uid;
+    if (payload) {
+      const uid = payload.sub;
+      const decodedPrivateKey = Buffer.from(process.env.POWERSYNC_PRIVATE_KEY as string, "base64");
+      const powerSyncPrivateKey = JSON.parse(new TextDecoder().decode(decodedPrivateKey));
+      const powerSyncKey = await importJWK(powerSyncPrivateKey);
 
-    //     const decodedPrivateKey = new Buffer.from(config.powersync.privateKey, "base64");
-    //     const powerSyncPrivateKey = JSON.parse(new TextDecoder().decode(decodedPrivateKey));
-    //     const powerSyncKey = await importJWK(powerSyncPrivateKey);
-    //     const token = await new SignJWT({})
-    //       .setProtectedHeader({
-    //         alg: powerSyncPrivateKey.alg,
-    //         kid: powerSyncPrivateKey.kid,
-    //       })
-    //       .setSubject(uid)
-    //       .setIssuedAt()
-    //       .setIssuer(config.powersync.jwtIssuer)
-    //       .setAudience(config.powersync.url)
-    //       .setExpirationTime("5m")
-    //       .sign(powerSyncKey);
+      const token = await new SignJWT({})
+        .setProtectedHeader({ alg: powerSyncPrivateKey.alg, kid: powerSyncPrivateKey.kid })
+        .setSubject(uid)
+        .setIssuedAt()
+        .setIssuer(process.env.JWT_ISSUER as string)
+        .setAudience(process.env.POWERSYNC_URL as string)
+        .setExpirationTime("5m")
+        .sign(powerSyncKey);
 
-    //     const responseBody = {
-    //       token: token,
-    //       powerSyncUrl: config.powersync.url,
-    //       expiresAt: null,
-    //       userId: uid,
-    //     };
+      const responseBody = {
+        token: token,
+        powerSyncUrl: process.env.POWERSYNC_URL,
+        expiresAt: null,
+        userId: uid,
+      };
 
-    //     return res.json(responseBody);
-    //   } else {
-    //     return res.status(401).send({ message: "Unable to verify Firebase idToken" });
-    //   }
+      return res.json(responseBody);
+    } else {
+      return res.status(401).send({ message: "Unable to verify token" });
+    }
   } catch (err: any) {
     console.log("[ERROR] Unexpected error", err);
     res.status(500).send({ message: err.message });

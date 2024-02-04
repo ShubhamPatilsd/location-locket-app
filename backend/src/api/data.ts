@@ -50,48 +50,67 @@ router.delete("/", async (req, res) => {
  * @param res
  * @returns {Promise<void>}
  */
-// TODO: Define types and the upsert function
+// TODO: Define types
 const upsert = async (body: { table: string; data: any }, res: Response) => {
-  // try {
-  //   const table = body.table;
-  //   const row = body.data;
-  //   console.log(row);
-  //   let text = null;
-  //   let values: any[] = [];
-  //   switch (table) {
-  //     case "lists":
-  //       text =
-  //         "INSERT INTO lists(id, created_at, name, owner_id) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO UPDATE SET created_at = EXCLUDED.created_at, name = EXCLUDED.name, owner_id = EXCLUDED.owner_id";
-  //       values = [row.id, row.created_at, row.name, row.owner_id];
-  //       break;
-  //     case "todos":
-  //       text =
-  //         "INSERT INTO todos(id, completed_at, description, completed, created_by, completed_by, list_id) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO UPDATE SET completed_at = EXCLUDED.completed_at, completed = EXCLUDED.completed, completed_by = EXCLUDED.completed_by";
-  //       values = [
-  //         row.id,
-  //         row.completed_at,
-  //         row.description,
-  //         row.completed,
-  //         row.created_by,
-  //         row.completed_by,
-  //         row.list_id,
-  //       ];
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  //   if (text && values.length > 0) {
-  //     const client = await pool.connect();
-  //     await client.query(text, values);
-  //     await client.release();
-  //     res.status(200).send({ message: `PUT completed for ${table} ${row.id}` });
-  //   } else {
-  //     res.status(400).send({ message: "Invalid body provided, expected table and data" });
-  //   }
-  // } catch (err: any) {
-  //   console.error(err);
-  //   res.status(500).send({ error: err.message });
-  // }
+  try {
+    const table = body.table;
+    const row = body.data;
+    console.log(row);
+    let text = null;
+    let values: any[] = [];
+    switch (table) {
+      case "users":
+        text =
+          "INSERT INTO users(id, firstName, lastName, email, profilePicture, lastKnownLocation, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (id) DO UPDATE SET firstName = EXCLUDED.firstName, lastName = EXCLUDED.lastName, email = EXCLUDED.email, profilePicture = EXCLUDED.profilePicture, lastKnownLocation = EXCLUDED.lastKnownLocation, updatedAt = EXCLUDED.updatedAt";
+        values = [
+          row.id,
+          row.firstName,
+          row.lastName,
+          row.email,
+          row.profilePicture,
+          row.lastKnownLocation,
+          row.createdAt,
+          row.updatedAt,
+        ];
+        break;
+      case "groups":
+        text =
+          "INSERT INTO todos(id, name, code, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, code = EXCLUDED.code, updatedAt = EXCLUDED.updatedAt, createdAt = EXCLUDED.createdAt";
+        values = [row.id, row.name, row.code, row.createdAt, row.updatedAt];
+        break;
+      case "group_to_user":
+        text =
+          "INSERT INTO group_to_user(group_id, user_id) VALUES ($1, $2) ON CONFLICT (group_id, user_id) DO NOTHING";
+        values = [row.group_id, row.user_id];
+        break;
+      case "posts":
+        text =
+          "INSERT INTO posts(id, frontImage, backImage, caption, location, authorId, groupId, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (id) DO UPDATE SET frontImage = EXCLUDED.frontImage, backImage = EXCLUDED.backImage, caption = EXCLUDED.caption, location = EXCLUDED.location, authorId = EXCLUDED.authorId, groupId = EXCLUDED.groupId, updatedAt = EXCLUDED.updatedAt, createdAt = EXCLUDED.createdAt";
+        values = [
+          row.id,
+          row.frontImage,
+          row.backImage,
+          row.caption,
+          row.location,
+          row.authorId,
+          row.groupId,
+          row.createdAt,
+          row.updatedAt,
+        ];
+        break;
+      default:
+        break;
+    }
+    if (text && values.length > 0) {
+      await prisma.$executeRawUnsafe(text, ...values);
+      res.status(200).send({ message: `PUT completed for ${table} ${row.id}` });
+    } else {
+      res.status(400).send({ message: "Invalid body provided, expected table and data" });
+    }
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send({ error: err.message });
+  }
 };
 
 export { router as dataRouter };

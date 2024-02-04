@@ -1,9 +1,8 @@
 {
-  "name": "powersync-nodejs-backend-todolist-demo",
+  "name": "memoir-backend",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
-  "author": "Mike Barnes <michael@journeyapps.com>",
   "scripts": {
     "start": "yarn build && pm2 start --no-daemon",
     "dev": "cross-env NODE_ENV=development nodemon src/index.ts",
@@ -12,6 +11,7 @@
     "build": "rimraf build && tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.7",
     "@prisma/client": "^5.8.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
