@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>locket-location</string>
+	<string>Memoir</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -27,13 +27,14 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>memoir</string>
 				<string>com.memoir.app</string>
 			</array>
 		</dict>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>exp+locket-location</string>
+				<string>exp+memoir</string>
 			</array>
 		</dict>
 	</array>
@@ -48,9 +49,20 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Allow Memoir to use your location.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Allow Memoir to use your location.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow Memoir to use your location.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
