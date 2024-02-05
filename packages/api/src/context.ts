@@ -1,11 +1,16 @@
-import { prisma } from "@memoir/db";
-import { type inferAsyncReturnType } from "@trpc/server";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getAuth } from "@clerk/nextjs/server";
+import {
+  decodeJwt,
+  signedInAuthObject,
+  signedOutAuthObject,
+} from "@clerk/clerk-sdk-node";
 import type {
   SignedInAuthObject,
   SignedOutAuthObject,
 } from "@clerk/nextjs/api";
+import { getAuth } from "@clerk/nextjs/server";
+import { prisma } from "@memoir/db";
+import { type CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
@@ -31,4 +36,31 @@ export const createContext = async (opts: CreateNextContextOptions) => {
   return await createContextInner({ auth: getAuth(opts.req) });
 };
 
-export type Context = inferAsyncReturnType<typeof createContext>;
+const parseJwt = (req: CreateExpressContextOptions["req"]) => {
+  const headerToken = req.headers.authorization?.replace("Bearer ", "");
+  return decodeJwt(headerToken || "");
+};
+
+export const createExpressContext = ({ req }: CreateExpressContextOptions) => {
+  const options = {
+    secretKey: process.env.SECRET_KEY,
+    apiUrl: "https://api.clerk.com",
+    apiVersion: "v1",
+    authStatus: req.headers["authStatus"],
+    authMessage: req.headers["authMessage"],
+    authReason: req.headers["authReason"],
+  };
+
+  let auth: SignedInAuthObject | SignedOutAuthObject;
+
+  try {
+    const jwt = parseJwt(req);
+    auth = signedInAuthObject(jwt.payload, { ...options, token: jwt.raw.text });
+  } catch (error) {
+    auth = signedOutAuthObject(options);
+  }
+
+  return createContextInner({ auth });
+};
+
+export type Context = Awaited<typeof createContext>;
