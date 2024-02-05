@@ -1,12 +1,10 @@
 import { useAuth } from "@clerk/clerk-expo";
-import type { AppRouter } from "@memoir/api";
-import { transformer } from "@memoir/api/transformer";
+import { transformer, type AppRouter } from "@memoir/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import Constants from "expo-constants";
 import React from "react";
-
 
 export const trpc = createTRPCReact<AppRouter>();
 
