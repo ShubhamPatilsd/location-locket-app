@@ -3,18 +3,9 @@ import { transformer, type AppRouter } from "@memoir/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
-import Constants from "expo-constants";
 import React from "react";
 
 export const trpc = createTRPCReact<AppRouter>();
-
-const getBaseUrl = () => {
-  const localhost = Constants.expoConfig?.hostUri;
-  if (!localhost)
-    throw new Error("failed to get localhost, configure it manually");
-
-  return localhost;
-};
 
 export const TRPCProvider: React.FC<{
   children: React.ReactNode;
@@ -31,7 +22,7 @@ export const TRPCProvider: React.FC<{
               Authorization: authToken ?? undefined,
             };
           },
-          url: `${getBaseUrl()}/api/trpc`,
+          url: `http://localhost:5000/api/trpc`,
           transformer,
         }),
       ],

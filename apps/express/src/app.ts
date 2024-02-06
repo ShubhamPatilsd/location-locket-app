@@ -1,4 +1,4 @@
-import { appRouter, createExpressContext } from "@memoir/api";
+import { appRouter, createContext } from "@memoir/api";
 import { authWebhook } from "@memoir/webhook";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express from "express";
@@ -8,10 +8,7 @@ const port = process.env.PORT || 5000;
 
 app.use(
   "/api/trpc",
-  createExpressMiddleware({
-    router: appRouter,
-    createContext: createExpressContext,
-  }),
+  createExpressMiddleware({ router: appRouter, createContext }),
 );
 
 app.use("/api/webhooks/user", express.json(), (req, res) => {

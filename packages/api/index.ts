@@ -3,7 +3,7 @@ import superjson from "superjson";
 import type { AppRouter } from "./src/router";
 
 export const transformer = superjson;
-export { createContext, createExpressContext } from "./src/context";
+export { createContext } from "./src/context";
 export type { Context } from "./src/context";
 export { appRouter } from "./src/router";
 export type { AppRouter } from "./src/router";

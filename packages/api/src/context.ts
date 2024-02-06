@@ -1,16 +1,12 @@
 import {
+  SignedInAuthObject,
+  SignedOutAuthObject,
   decodeJwt,
   signedInAuthObject,
   signedOutAuthObject,
 } from "@clerk/clerk-sdk-node";
-import type {
-  SignedInAuthObject,
-  SignedOutAuthObject,
-} from "@clerk/nextjs/api";
-import { getAuth } from "@clerk/nextjs/server";
 import { prisma } from "@memoir/db";
 import { type CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
 /**
  * Replace this with an object if you want to pass things to createContextInner
@@ -28,20 +24,12 @@ export const createContextInner = async ({ auth }: AuthContextProps) => {
   return { auth, prisma };
 };
 
-/**
- * This is the actual context you'll use in your router
- * @link https://trpc.io/docs/context
- **/
-export const createContext = async (opts: CreateNextContextOptions) => {
-  return await createContextInner({ auth: getAuth(opts.req) });
-};
-
 const parseJwt = (req: CreateExpressContextOptions["req"]) => {
   const headerToken = req.headers.authorization?.replace("Bearer ", "");
   return decodeJwt(headerToken || "");
 };
 
-export const createExpressContext = ({ req }: CreateExpressContextOptions) => {
+export const createContext = ({ req }: CreateExpressContextOptions) => {
   const options = {
     secretKey: process.env.SECRET_KEY,
     apiUrl: "https://api.clerk.com",

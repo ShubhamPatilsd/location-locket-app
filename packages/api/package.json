@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.8",
     "@memoir/db": "*",
     "@trpc/client": "next",
     "@trpc/server": "next",
