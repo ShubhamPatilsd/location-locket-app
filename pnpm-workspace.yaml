@@ -1,6 +1,0 @@
-packages:
-  - apps/expo
-  - apps/express
-  - packages/api
-  - packages/db
-  - packages/webhook

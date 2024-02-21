@@ -1,4 +1,3 @@
-import { prisma } from "@memoir/db";
 import { type IncomingHttpHeaders } from "http";
 import { Webhook, type WebhookRequiredHeaders } from "svix";
 
