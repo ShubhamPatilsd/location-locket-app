@@ -4,7 +4,6 @@ import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MainPage } from "../components/MainPage";
-import { TRPCProvider } from "../utils/trpc";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -12,14 +11,12 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <SignedIn>
-        <TRPCProvider>
-          <SafeAreaProvider>
-            <SafeAreaView style={styles.container}>
-              <MainPage />
-            </SafeAreaView>
-            <StatusBar style="auto" />
-          </SafeAreaProvider>
-        </TRPCProvider>
+        <SafeAreaProvider>
+          <SafeAreaView style={styles.container}>
+            <MainPage />
+          </SafeAreaView>
+          <StatusBar style="auto" />
+        </SafeAreaProvider>
       </SignedIn>
       <SignedOut>
         <Link href="/signIn" asChild>

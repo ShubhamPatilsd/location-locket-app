@@ -1,5 +1,5 @@
 {
-  "name": "@memoir/expo",
+  "name": "memoir",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
@@ -12,11 +12,7 @@
   "dependencies": {
     "@clerk/clerk-expo": "^0.20.3",
     "@expo/config-plugins": "~7.8.0",
-    "@memoir/api": "*",
-    "@memoir/db": "*",
     "@tanstack/react-query": "^5.12.2",
-    "@trpc/client": "next",
-    "@trpc/react-query": "next",
     "base-64": "^1.0.0",
     "expo": "~50.0.2",
     "expo-auth-session": "^5.4.0",
