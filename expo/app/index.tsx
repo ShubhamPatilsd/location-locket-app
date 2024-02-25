@@ -1,7 +1,7 @@
 import { SignedIn, SignedOut } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { MainPage } from "../components/MainPage";
 
@@ -9,13 +9,13 @@ export { ErrorBoundary } from "expo-router";
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <SignedIn>
         <SafeAreaProvider>
-          <SafeAreaView style={styles.container}>
+          <View>
             <MainPage />
-          </SafeAreaView>
-          <StatusBar style="auto" />
+          </View>
+          <StatusBar backgroundColor={"transparent"} translucent />
         </SafeAreaProvider>
       </SignedIn>
       <SignedOut>
@@ -31,7 +31,7 @@ export default function App() {
           </Pressable>
         </Link>
       </SignedOut>
-    </SafeAreaView>
+    </>
   );
 }
 
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
 });

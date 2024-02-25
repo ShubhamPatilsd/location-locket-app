@@ -1,5 +1,6 @@
 import { type IncomingHttpHeaders } from "http";
 import { Webhook, type WebhookRequiredHeaders } from "svix";
+import { prisma } from "./db";
 
 const webhookSecret = process.env.WEBHOOK_SECRET as string;
 type EventType = "user.created" | "user.updated" | "user.deleted";

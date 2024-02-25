@@ -1,5 +1,11 @@
 import * as React from "react";
-import { Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
 import { styles } from "../components/Styles";
 import { Link, router } from "expo-router";
@@ -35,9 +41,12 @@ export default function SignUpScreen() {
     if (!isLoaded) return;
 
     try {
-      const completeSignUp = await signUp.attemptEmailAddressVerification({ code });
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+
       await setActive({ session: completeSignUp.createdSessionId });
-      router.push("/");
+      router.replace("/");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
     }
@@ -75,7 +84,10 @@ export default function SignUpScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={onSignUpPress}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={onSignUpPress}
+          >
             <Text style={styles.primaryButtonText}>Sign up</Text>
           </TouchableOpacity>
 
@@ -93,7 +105,11 @@ export default function SignUpScreen() {
       {pendingVerification && (
         <View>
           <View>
-            <TextInput value={code} placeholder="Code..." onChangeText={(code) => setCode(code)} />
+            <TextInput
+              value={code}
+              placeholder="Code..."
+              onChangeText={(code) => setCode(code)}
+            />
           </View>
           <TouchableOpacity onPress={onPressVerify}>
             <Text>Verify Email</Text>
