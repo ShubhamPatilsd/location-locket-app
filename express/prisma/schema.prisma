@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id                String @id
+  id                String  @id
   firstName         String
   lastName          String
   email             String
@@ -25,12 +25,12 @@ model User {
 }
 
 model Group {
-  id   String @id
+  id   String @id @default(uuid())
   name String
-  code Int
+  code Int    @unique
 
-  groups GroupToUser[]
-  post   Post[]
+  users GroupToUser[]
+  post  Post[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -49,7 +49,7 @@ model GroupToUser {
 }
 
 model Post {
-  id         String @id
+  id         String @id @default(uuid())
   frontImage String
   backImage  String
   caption    String
