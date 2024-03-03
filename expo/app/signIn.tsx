@@ -39,7 +39,7 @@ export default function SignInScreen() {
       }
 
       await setActive({ session: completeSignIn.createdSessionId });
-      router.push("/");
+      router.push("/group/join");
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
     }
