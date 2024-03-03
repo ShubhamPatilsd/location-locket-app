@@ -17,7 +17,7 @@ export const MainPage = () => {
   const { width, height } = useWindowDimensions();
 
   const styles = StyleSheet.create({
-    container: {},
+    container: { position: "relative" },
     map: {
       width: width,
       height: height,
@@ -39,18 +39,20 @@ export const MainPage = () => {
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation
-        followsUserLocation
-        showsMyLocationButton={true}
-      />
+      {location && (
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: location?.coords.latitude,
+            longitude: location?.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          showsCompass={false}
+          showsUserLocation
+          showsMyLocationButton={true}
+        />
+      )}
     </View>
   );
 };

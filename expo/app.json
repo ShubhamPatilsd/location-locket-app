@@ -13,16 +13,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": [
-          "location",
-          "fetch"
-        ],
+        "UIBackgroundModes": ["location", "fetch"],
         "NSLocationWhenInUseUsageDescription": "text",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "text",
         "NSLocationAlwaysUsageDescription": "text"
@@ -52,6 +47,12 @@
           "locationAlwaysAndWhenInUsePermission": "Allow Memoir to use your location.",
           "locationAlwaysPermission": "Allow Memoir to use your location.",
           "locationWhenInUsePermission": "Allow Memoir to use your location."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Memoir takes your photos to let you share them with your friends."
         }
       ]
     ],
