@@ -4,15 +4,13 @@
   "version": "0.1.0",
   "main": "./index.ts",
   "scripts": {
-    "start": "ts-node build/app.js",
     "build": "tsc",
-    "dev": "pnpm with-env ts-node-dev index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsx index.ts",
+    "dev": "tsx watch index.ts",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
-    "type-check": "tsc --noEmit",
-    "with-env": "dotenv -e ../../.env --"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.11",
@@ -23,7 +21,8 @@
     "lodash-es": "^4.17.21",
     "secure-pin": "^1.0.14",
     "svix": "^1.6.0",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "tsx": "^3.12.6"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

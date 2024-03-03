@@ -8,15 +8,31 @@ datasource db {
 }
 
 model User {
-  id                String  @id
-  firstName         String
-  lastName          String
-  email             String
-  profilePicture    String
-  lastKnownLocation String?
+  id             String @id
+  firstName      String
+  lastName       String
+  email          String
+  profilePicture String
 
   groups GroupToUser[]
   posts  Post[]
+
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Location {
+  id        String @id @default(uuid())
+  latitude  Float
+  longitude Float
+
+  users User[]
+  posts Post[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -53,7 +69,9 @@ model Post {
   frontImage String
   backImage  String
   caption    String
-  location   String
+
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
 
   authorId String
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
