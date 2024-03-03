@@ -1,8 +1,8 @@
-import express, { NextFunction, Request, Response } from "express";
-import { authWebhook } from "./webhook";
 import { verifyToken } from "@clerk/clerk-sdk-node";
-import { prisma } from "./db";
+import express, { NextFunction, Request, Response } from "express";
 import * as securePin from "secure-pin";
+import { prisma } from "./db";
+import { authWebhook } from "./webhook";
 
 const app = express();
 app.use(express.json());
@@ -19,36 +19,33 @@ app.use("/api/webhooks/user", (req, res) => {
     });
 });
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization;
+const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const token = req.headers.authorization?.replace("Bearer ", "") as string;
 
-  if (token) next();
-  else res.status(401).json({ message: "unauthorized" });
+  const jwt = await verifyToken(token, {
+    secretKey: process.env.CLERK_SECRET_KEY as string,
+    issuer: process.env.CLERK_ISSUER as string,
+  });
+
+  const user = await prisma.user.findUnique({
+    where: { id: jwt.sub },
+  });
+
+  if (!user) return res.status(404).json({ message: "user not found" });
+
+  req.user = user;
+  return next();
 };
 
 app.get("/me", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "") as string;
-
-  try {
-    const jwt = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY as string,
-      issuer: process.env.CLERK_ISSUER as string,
-    });
-
-    const user = await prisma.user.findUnique({
-      where: { id: jwt.sub },
-    });
-
-    if (user) res.json(user);
-    else res.status(404).json({ message: "user not found" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "server error" });
-  }
+  return res.json(req.user);
 });
 
 app.post("/group/start", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "") as string;
   const { name } = req.body;
 
   if (!name || name.trim() === "") {
@@ -56,24 +53,12 @@ app.post("/group/start", authMiddleware, async (req, res) => {
   }
 
   try {
-    const jwt = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY as string,
-      issuer: process.env.CLERK_ISSUER as string,
-    });
-
-    const user = await prisma.user.findUnique({
-      where: { id: jwt.sub },
-    });
-
-    if (!user) return res.status(404).json({ message: "user not found" });
-
     const code = securePin.generatePinSync(8);
-
     const group = await prisma.group.create({
       data: {
         name,
         code: parseInt(code),
-        users: { create: { userId: user.id } },
+        users: { create: { userId: req.user.id } },
       },
     });
 
@@ -85,7 +70,6 @@ app.post("/group/start", authMiddleware, async (req, res) => {
 });
 
 app.post("/group/join", authMiddleware, async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "") as string;
   const { code } = req.body as { code: string };
 
   if (!code || code.trim() === "") {
@@ -93,17 +77,6 @@ app.post("/group/join", authMiddleware, async (req, res) => {
   }
 
   try {
-    const jwt = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY as string,
-      issuer: process.env.CLERK_ISSUER as string,
-    });
-
-    const user = await prisma.user.findUnique({
-      where: { id: jwt.sub },
-    });
-
-    if (!user) return res.status(404).json({ message: "user not found" });
-
     const group = await prisma.group.findUnique({
       where: { code: parseInt(code) },
     });
@@ -115,14 +88,84 @@ app.post("/group/join", authMiddleware, async (req, res) => {
       data: {
         users: {
           connectOrCreate: {
-            where: { groupId_userId: { groupId: group.id, userId: user.id } },
-            create: { userId: user.id },
+            where: {
+              groupId_userId: { groupId: group.id, userId: req.user.id },
+            },
+            create: { userId: req.user.id },
           },
         },
       },
     });
 
     return res.json(group);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "server error" });
+  }
+});
+
+app.get("/group/:id", authMiddleware, async (req, res) => {
+  const { id } = req.params;
+
+  if (!id || id.trim() === "") {
+    return res.status(400).json({ message: "id is required" });
+  }
+
+  try {
+    const group = await prisma.group.findUnique({
+      where: { id },
+      include: { users: { include: { user: true } } },
+    });
+
+    if (!group) return res.status(404).json({ message: "group not found" });
+
+    return res.json(group);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "server error" });
+  }
+});
+
+app.get("/groups", authMiddleware, async (req, res) => {
+  try {
+    const groups = await prisma.group.findMany({
+      where: { users: { some: { userId: req.user.id } } },
+      select: { id: true, name: true },
+    });
+
+    return res.json(groups);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "server error" });
+  }
+});
+
+app.post("/location", authMiddleware, async (req, res) => {
+  const { latitude, longitude } = req.body as {
+    latitude: number;
+    longitude: number;
+  };
+
+  if (!latitude || !longitude) {
+    return res
+      .status(400)
+      .json({ message: "latitude and longitude are required" });
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        location: {
+          upsert: {
+            create: { latitude, longitude },
+            update: { latitude, longitude },
+          },
+        },
+      },
+    });
+
+    return res.status(200);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "server error" });
