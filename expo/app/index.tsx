@@ -1,28 +1,33 @@
-import { SignedIn, SignedOut } from "@clerk/clerk-expo";
+import { SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-expo";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
-} from "react-native";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useEffect } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MainPage } from "../components/MainPage";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import * as ImagePicker from "expo-image-picker";
 
 export { ErrorBoundary } from "expo-router";
 
 export default function App() {
-  const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
+  const { getToken } = useAuth();
+  const { user } = useUser();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["user", user?.id],
+    queryFn: async () => {
+      const token = await getToken();
+      const response = await fetch("http://localhost:5000/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return response.json();
+    },
+  });
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   return (
     <>
@@ -30,52 +35,24 @@ export default function App() {
         <SafeAreaProvider>
           <View>
             <MainPage />
-            <View
-              style={{
-                marginTop: insets.top,
-                position: "absolute",
-                height: height - 0.1 * height,
-                width: width,
-                padding: 25,
-                pointerEvents: "box-none",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  ImagePicker.launchCameraAsync();
-                }}
-                style={{
-                  borderRadius: 100,
-                  position: "absolute",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  bottom: 25,
-                  right: 25,
-                  width: 50,
-                  height: 50,
-                  backgroundColor: "black",
-                }}
-              >
-                <Ionicons name="camera-outline" size={25} color={"white"} />
-              </TouchableOpacity>
-            </View>
           </View>
           <StatusBar backgroundColor={"transparent"} translucent />
         </SafeAreaProvider>
       </SignedIn>
       <SignedOut>
-        <Link href="/signIn" asChild>
-          <Pressable>
-            <Text>Sign in</Text>
-          </Pressable>
-        </Link>
+        <View style={styles.container}>
+          <Link href="/signIn" asChild>
+            <Pressable>
+              <Text>Sign in</Text>
+            </Pressable>
+          </Link>
 
-        <Link href="/signUp" asChild>
-          <Pressable>
-            <Text>Sign up</Text>
-          </Pressable>
-        </Link>
+          <Link href="/signUp" asChild>
+            <Pressable>
+              <Text>Sign up</Text>
+            </Pressable>
+          </Link>
+        </View>
       </SignedOut>
     </>
   );
@@ -85,7 +62,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    // alignItems: "center",
-    // justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

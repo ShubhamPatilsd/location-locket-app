@@ -1,10 +1,18 @@
 import { ClerkProvider } from "@clerk/clerk-expo";
+import NetInfo from "@react-native-community/netinfo";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { View } from "react-native";
-
 export { ErrorBoundary } from "expo-router";
+
+const queryClient = new QueryClient();
+
+onlineManager.setEventListener((setOnline) => {
+  return NetInfo.addEventListener((state) => {
+    setOnline(!!state.isConnected);
+  });
+});
 
 export default function RootLayout() {
   return (
@@ -13,13 +21,15 @@ export default function RootLayout() {
       publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
     >
       <ThemeProvider value={DefaultTheme}>
-        <Stack
-          screenOptions={{
-            header: (props) => {
-              return <View></View>;
-            },
-          }}
-        />
+        <QueryClientProvider client={queryClient}>
+          <Stack
+          // screenOptions={{
+          //   header: (props) => {
+          //     return <View></View>;
+          //   },
+          // }}
+          />
+        </QueryClientProvider>
       </ThemeProvider>
     </ClerkProvider>
   );
