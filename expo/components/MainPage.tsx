@@ -1,7 +1,10 @@
+import { useAuth } from "@clerk/clerk-expo";
 import FoundationIcon from "@expo/vector-icons/Foundation";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import { router } from "expo-router";
+import { Stack, router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -12,13 +15,18 @@ import {
 } from "react-native";
 import MapView from "react-native-maps";
 
-export const MainPage = () => {
+type Props = {
+  group: any;
+};
+
+export const MainPage: React.FC<Props> = ({ group }) => {
   const [cameraStatus, requestPermission] = ImagePicker.useCameraPermissions();
 
   const [location, setLocation] = useState<Location.LocationObject>();
   const [errorMsg, setErrorMsg] = useState<string>("null");
 
   const { width, height } = useWindowDimensions();
+  const { getToken } = useAuth();
 
   const styles = StyleSheet.create({
     container: { position: "relative" },
@@ -50,6 +58,20 @@ export const MainPage = () => {
     },
   });
 
+  const mutateLocation = useMutation({
+    mutationFn: async (location: any) => {
+      console.log(location);
+      const token = await getToken();
+      const response = await axios.post(
+        `http://localhost:5000/location`,
+        location,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      return response.data;
+    },
+  });
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -61,11 +83,22 @@ export const MainPage = () => {
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
+
+      mutateLocation.mutate(location.coords);
     })();
   }, []);
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerTitle: (props) => (
+            <View {...props}>
+              <Text>{group.name}</Text>
+            </View>
+          ),
+        }}
+      />
       {location && (
         <MapView
           style={styles.map}
@@ -82,7 +115,7 @@ export const MainPage = () => {
       )}
       <View style={styles.toolbar}>
         <TouchableOpacity
-          onPress={() => router.push("/group/join")}
+          onPress={() => router.push("/group/list")}
           style={styles.button}
         >
           <FoundationIcon name="list" size={32} color="black" />
