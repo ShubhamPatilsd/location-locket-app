@@ -1,16 +1,20 @@
-import { Link } from "expo-router";
+import FoundationIcon from "@expo/vector-icons/Foundation";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Pressable,
-  Text,
-  View,
   StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
   useWindowDimensions,
 } from "react-native";
 import MapView from "react-native-maps";
-import * as Location from "expo-location";
 
 export const MainPage = () => {
+  const [cameraStatus, requestPermission] = ImagePicker.useCameraPermissions();
+
   const [location, setLocation] = useState<Location.LocationObject>();
   const [errorMsg, setErrorMsg] = useState<string>("null");
 
@@ -18,6 +22,28 @@ export const MainPage = () => {
 
   const styles = StyleSheet.create({
     container: { position: "relative" },
+    toolbar: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+      backgroundColor: "white",
+      borderTopLeftRadius: 100,
+      borderTopRightRadius: 100,
+      paddingVertical: 15,
+      zIndex: 12,
+      position: "absolute",
+      width: width,
+      bottom: 97,
+    },
+    button: {
+      padding: 10,
+    },
+    middleButton: {
+      backgroundColor: "#f0f0f0",
+      borderRadius: 30,
+      paddingVertical: 15,
+      paddingHorizontal: 20,
+    },
     map: {
       width: width,
       height: height,
@@ -27,6 +53,7 @@ export const MainPage = () => {
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
+      await requestPermission();
       if (status !== "granted") {
         setErrorMsg("Permission to access location was denied");
         return;
@@ -53,6 +80,28 @@ export const MainPage = () => {
           showsMyLocationButton={true}
         />
       )}
+      <View style={styles.toolbar}>
+        <TouchableOpacity
+          onPress={() => router.push("/group/join")}
+          style={styles.button}
+        >
+          <FoundationIcon name="list" size={32} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            ImagePicker.launchImageLibraryAsync();
+          }}
+          style={[styles.button, styles.middleButton]}
+        >
+          <FoundationIcon name="camera" size={32} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/profile")}
+        >
+          <FoundationIcon name="torso" size={32} color="black" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
