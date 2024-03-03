@@ -25,6 +25,10 @@ interface Data {
 
   profile_image_url: string;
   updated_at: number;
+
+  email_addresses: [
+    { email_address: string; verified: boolean; primary: boolean },
+  ];
 }
 
 export const authWebhook = async (
@@ -52,19 +56,19 @@ export const authWebhook = async (
   const eventType = evt.type;
 
   if (eventType === "user.created" || eventType === "user.updated") {
-    const { id, ...attr } = evt.data;
+    const { id, ...attr } = evt.data as Data;
 
     await prisma.user.upsert({
       where: { id: id },
       create: {
         id: id,
-        email: attr.external_id,
+        email: attr.email_addresses[0].email_address,
         firstName: attr.first_name,
         lastName: attr.last_name,
         profilePicture: attr.profile_image_url,
       },
       update: {
-        email: attr.external_id,
+        email: attr.email_addresses[0].email_address,
         firstName: attr.first_name,
         lastName: attr.last_name,
         profilePicture: attr.profile_image_url,
