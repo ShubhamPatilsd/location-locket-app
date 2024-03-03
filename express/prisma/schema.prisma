@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String @id
+  firstName      String
+  lastName       String
+  email          String
+  profilePicture String
+
+  groups GroupToUser[]
+  posts  Post[]
+
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Location {
+  id        String @id @default(uuid())
+  latitude  Float
+  longitude Float
+
+  users User[]
+  posts Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model Group {
+  id   String @id @default(uuid())
+  name String
+  code Int    @unique
+
+  users GroupToUser[]
+  post  Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model GroupToUser {
+  groupId String
+  userId  String
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+}
+
+model Post {
+  id         String @id @default(uuid())
+  frontImage String
+  backImage  String
+  caption    String
+
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
