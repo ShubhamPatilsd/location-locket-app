@@ -113,7 +113,7 @@ export const MainPage: React.FC<Props> = ({ group }) => {
           showsMyLocationButton={true}
         />
       )}
-      <View style={styles.toolbar}>
+      {/* <View style={styles.toolbar}>
         <TouchableOpacity
           onPress={() => router.push("/group/list")}
           style={styles.button}
@@ -134,7 +134,7 @@ export const MainPage: React.FC<Props> = ({ group }) => {
         >
           <FoundationIcon name="torso" size={32} color="black" />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };

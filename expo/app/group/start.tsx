@@ -57,7 +57,7 @@ export default function StartGroupPage() {
       <View style={styles.footer}>
         <Text>OR</Text>
 
-        <Link href="/group/start" asChild>
+        <Link href="/group/join" asChild>
           <Pressable style={styles.secondaryButton}>
             <Text style={styles.secondaryButtonText}>Join shenanigans</Text>
           </Pressable>

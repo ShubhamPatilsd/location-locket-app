@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
 import { Link, router } from "expo-router";
-import { useEffect } from "react";
+import * as React from "react";
 import {
   FlatList,
   StyleSheet,
@@ -26,7 +26,7 @@ export default function App() {
     },
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isLoading) return;
     if (data.length < 0) router.replace("/group/join");
   }, [isLoading, data]);

@@ -1,13 +1,36 @@
-import { useAuth } from "@clerk/clerk-expo";
+import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 export { ErrorBoundary } from "expo-router";
 
 export default function App() {
+  return (
+    <View className="flex-1 items-center justify-center bg-white">
+      <SignedIn>
+        <SignedInView />
+      </SignedIn>
+      <SignedOut>
+        <Link href="/signIn" asChild>
+          <Pressable>
+            <Text>Sign in</Text>
+          </Pressable>
+        </Link>
+
+        <Link href="/signUp" asChild>
+          <Pressable>
+            <Text>Sign up</Text>
+          </Pressable>
+        </Link>
+      </SignedOut>
+    </View>
+  );
+}
+
+const SignedInView = () => {
   const { getToken } = useAuth();
 
   const { data, isLoading } = useQuery({
@@ -27,7 +50,7 @@ export default function App() {
     if (isLoading) return;
 
     (async () => {
-      if (!data || data.length < 0) {
+      if (!data || data.length < 1) {
         router.replace("/group/join");
       } else {
         const recentGroupId = await AsyncStorage.getItem("recent-group");
@@ -44,6 +67,11 @@ export default function App() {
   return (
     <View>
       <Text>Loading...</Text>
+      <Link href="/profile" asChild>
+        <Pressable>
+          <Text>Profile</Text>
+        </Pressable>
+      </Link>
     </View>
   );
-}
+};

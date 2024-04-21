@@ -1,4 +1,4 @@
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
+import { ClerkProvider } from "@clerk/clerk-expo";
 import NetInfo from "@react-native-community/netinfo";
 import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import {
@@ -6,10 +6,9 @@ import {
   QueryClientProvider,
   onlineManager,
 } from "@tanstack/react-query";
-import { Link, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const queryClient = new QueryClient();
@@ -22,36 +21,19 @@ onlineManager.setEventListener((setOnline) => {
 
 export default function RootLayout() {
   return (
-    <ClerkProvider
-      tokenCache={tokenCache}
-      publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
-    >
-      <ThemeProvider value={DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
+      <ClerkProvider
+        tokenCache={tokenCache}
+        publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
+      >
         <QueryClientProvider client={queryClient}>
-          <SignedIn>
-            <SafeAreaProvider>
-              <Stack />
-              <StatusBar backgroundColor={"transparent"} translucent />
-            </SafeAreaProvider>
-          </SignedIn>
-          <SignedOut>
-            <View style={styles.container}>
-              <Link href="/signIn" asChild>
-                <Pressable>
-                  <Text>Sign in</Text>
-                </Pressable>
-              </Link>
-
-              <Link href="/signUp" asChild>
-                <Pressable>
-                  <Text>Sign up</Text>
-                </Pressable>
-              </Link>
-            </View>
-          </SignedOut>
+          <SafeAreaProvider>
+            <Stack />
+            <StatusBar backgroundColor={"transparent"} translucent />
+          </SafeAreaProvider>
         </QueryClientProvider>
-      </ThemeProvider>
-    </ClerkProvider>
+      </ClerkProvider>
+    </ThemeProvider>
   );
 }
 
@@ -71,12 +53,3 @@ const tokenCache = {
     }
   },
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
