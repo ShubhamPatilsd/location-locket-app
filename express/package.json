@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc",
     "start": "tsx index.ts",
+    "dev:all": "(trap 'kill 0' SIGINT; yarn dev & yarn tunnel & yarn studio)",
+    "tunnel": "underpass -p 5000 -s memori",
     "dev": "tsx watch index.ts",
+    "studio": "prisma studio --browser=none",
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",

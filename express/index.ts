@@ -1,7 +1,7 @@
 import { verifyToken } from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
 import * as securePin from "secure-pin";
-import { prisma } from "./db";
+import { Group, GroupToUser, User, prisma } from "./db";
 import { authWebhook } from "./webhook";
 
 const app = express();
@@ -119,7 +119,7 @@ app.get("/group/:id", authMiddleware, async (req, res) => {
 
     if (!group) return res.status(404).json({ message: "group not found" });
 
-    return res.json(group);
+    return res.json(group as Group & { users: { user: User }[] });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "server error" });
