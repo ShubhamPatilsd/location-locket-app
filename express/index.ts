@@ -114,12 +114,14 @@ app.get("/group/:id", authMiddleware, async (req, res) => {
   try {
     const group = await prisma.group.findUnique({
       where: { id },
-      include: { users: { include: { user: true } } },
+      include: {
+        users: { include: { user: { include: { location: true } } } },
+      },
     });
 
     if (!group) return res.status(404).json({ message: "group not found" });
 
-    return res.json(group as Group & { users: { user: User }[] });
+    return res.json(group);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "server error" });

@@ -55,10 +55,12 @@ const SignedInView = () => {
       } else {
         const recentGroupId = await AsyncStorage.getItem("recent-group");
         if (data.find((group: any) => group.id === recentGroupId)) {
-          router.replace(`/group/${recentGroupId}`);
+          router.replace(`/group/list`);
+          router.push(`/group/${recentGroupId}`);
         } else {
           await AsyncStorage.setItem("recent-group", data[0].id);
-          router.replace(`/group/${data[0].id}`);
+          router.replace(`/group/list`);
+          router.push(`/group/${data[0].id}`);
         }
       }
     })();

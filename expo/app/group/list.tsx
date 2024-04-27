@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "@tanstack/react-query";
-import { Link, router } from "expo-router";
+import { Link, router, Stack } from "expo-router";
 import * as React from "react";
 import {
   FlatList,
@@ -37,6 +37,11 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerTitle: (props) => <Text {...props}>Your Groups</Text>,
+        }}
+      />
       <FlatList
         style={styles.list}
         keyExtractor={(item) => item.id}
