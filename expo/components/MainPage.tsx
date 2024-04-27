@@ -60,7 +60,6 @@ export const MainPage: React.FC<Props> = ({ group }) => {
 
   const mutateLocation = useMutation({
     mutationFn: async (location: any) => {
-      console.log(location);
       const token = await getToken();
       const response = await axios.post(
         `http://localhost:5000/location`,
@@ -90,15 +89,6 @@ export const MainPage: React.FC<Props> = ({ group }) => {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerTitle: (props) => (
-            <View {...props}>
-              <Text>{group.name}</Text>
-            </View>
-          ),
-        }}
-      />
       {location && (
         <MapView
           style={styles.map}
