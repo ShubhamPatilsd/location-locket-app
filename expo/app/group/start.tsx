@@ -18,9 +18,13 @@ export default function StartGroupPage() {
   const createGroup = useMutation({
     mutationFn: async (newGroup: { name: string }) => {
       const token = await getToken();
-      return axios.post("http://localhost:5000/group/start", newGroup, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      return axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}/group/start`,
+        newGroup,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
     },
     onSuccess: () => {
       alert("Group created");

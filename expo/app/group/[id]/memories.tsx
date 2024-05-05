@@ -12,9 +12,12 @@ const MemoriesPage = () => {
     queryKey: ["group", id],
     queryFn: async () => {
       const token = await getToken();
-      const response = await fetch(`http://localhost:5000/group/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/group/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       return response.json();
     },
   });

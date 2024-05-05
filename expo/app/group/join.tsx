@@ -19,7 +19,7 @@ export default function JoinGroupPage() {
   const joinGroup = useMutation({
     mutationFn: async (newGroup: { code: string }) => {
       const token = await getToken();
-      return axios.post("http://localhost:5000/group/join", newGroup, {
+      return axios.post(`${process.env.EXPO_PUBLIC_API_URL}/group/join`, newGroup, {
         headers: { Authorization: `Bearer ${token}` },
       });
     },

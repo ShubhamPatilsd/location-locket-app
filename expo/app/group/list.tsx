@@ -19,9 +19,12 @@ export default function App() {
     queryKey: ["groups"],
     queryFn: async () => {
       const token = await getToken();
-      const response = await fetch(`http://localhost:5000/groups`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/groups`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       return response.json();
     },
   });

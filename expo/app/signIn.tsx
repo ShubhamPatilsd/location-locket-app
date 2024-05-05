@@ -51,6 +51,7 @@ export default function SignInScreen() {
         <>
           <View style={styles.inputView}>
             <TextInput
+              textContentType="emailAddress"
               autoCapitalize="none"
               value={emailAddress}
               style={styles.textInput}
