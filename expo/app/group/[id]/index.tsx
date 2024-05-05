@@ -4,20 +4,126 @@ import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { Image, Text, View } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { MainPage } from "../../../components/MainPage";
+import distFrom from "distance-from";
+import * as Location from "expo-location";
+import { useMutation } from "@tanstack/react-query";
+import MapView, { Marker } from "react-native-maps";
 
 export default function MapPage() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const params = useLocalSearchParams();
-  const group = JSON.parse(params.group as string || "{}");
+  const group = JSON.parse((params.group as string) || "{}");
+
+  const [location, setLocation] = useState<Location.LocationObject>();
+  const [errorMsg, setErrorMsg] = useState<string>("null");
+
+  const { width, height } = useWindowDimensions();
+  const { getToken, userId } = useAuth();
+
+  const styles = StyleSheet.create({
+    container: { position: "relative" },
+    toolbar: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+      backgroundColor: "white",
+      borderTopLeftRadius: 100,
+      borderTopRightRadius: 100,
+      paddingVertical: 15,
+      zIndex: 12,
+      position: "absolute",
+      width: width,
+      bottom: 97,
+    },
+    button: {
+      padding: 10,
+    },
+    middleButton: {
+      backgroundColor: "#f0f0f0",
+      borderRadius: 30,
+      paddingVertical: 15,
+      paddingHorizontal: 20,
+    },
+    map: {
+      width: width,
+      height: height,
+    },
+  });
+
+  const mutateLocation = useMutation({
+    mutationFn: async (location: any) => {
+      const token = await getToken();
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}/location`,
+        location,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      return response.data;
+    },
+  });
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+
+      mutateLocation.mutate(location.coords);
+    })();
+  }, []);
 
   return (
     <>
       <GestureHandlerRootView>
         <View>
-          <MainPage group={group} />
+          <View style={styles.container}>
+            {location && (
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: location?.coords.latitude,
+                  longitude: location?.coords.longitude,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+              }}
+                showsUserLocation
+                showsMyLocationButton={true}
+                zoomEnabled={true}
+                zoomControlEnabled={true}
+                zoomTapEnabled={true}
+              >
+                {group.users
+                  .filter(
+                    ({ user }: any) => user.location && userId !== user.id,
+                  )
+                  .map(({ user }: any) => (
+                    <Marker
+                      key={user.id}
+                      coordinate={{
+                        latitude: user.location.latitude,
+                        longitude: user.location.longitude,
+                      }}
+                      title={user.name}
+                      image={{ uri: user.profilePicture }}
+                    />
+                  ))}
+              </MapView>
+            )}
+          </View>
           <BottomSheet
             ref={bottomSheetRef}
             index={1}
@@ -25,8 +131,10 @@ export default function MapPage() {
           >
             <BottomSheetFlatList
               data={group?.users || []}
-              keyExtractor={(i: number) => i.toString()}
-              renderItem={({ item }) => <UserItem item={item} />}
+              keyExtractor={(i: any) => i.user.id}
+              renderItem={({ item }) => (
+                <UserItem currentLocation={location?.coords} item={item} />
+              )}
             />
           </BottomSheet>
         </View>
@@ -35,14 +143,14 @@ export default function MapPage() {
   );
 }
 
-const UserItem = ({ item }: any) => {
+const UserItem = ({ item, currentLocation }: any) => {
   const { userId } = useAuth();
 
   const [city, setCity] = useState<string>("");
   const [state, setState] = useState<string>("");
 
   useEffect(() => {
-    if (!item) return;
+    if (!item || !item.user.location) return;
     if (city || state) return;
 
     axios
@@ -75,7 +183,14 @@ const UserItem = ({ item }: any) => {
         </Text>
       </View>
       <Text className="text-gray-500">
-        {item.user.id === userId ? "You" : "5mi"}
+        {item.user.id === userId
+          ? "You"
+          : item.user.location && currentLocation
+          ? distFrom([currentLocation.latitude, currentLocation.longitude])
+              .to([item.user.location.latitude, item.user.location.longitude])
+              .in("miles")
+              .toPrecision(2) + " mi"
+          : "--"}
       </Text>
     </View>
   );
