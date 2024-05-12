@@ -99,7 +99,7 @@ export default function MapPage() {
                   longitude: location?.coords.longitude,
                   latitudeDelta: 0.0922,
                   longitudeDelta: 0.0421,
-              }}
+                }}
                 showsUserLocation
                 showsMyLocationButton={true}
                 zoomEnabled={true}
@@ -120,6 +120,26 @@ export default function MapPage() {
                       title={user.name}
                       image={{ uri: user.profilePicture }}
                     />
+                  ))}
+                {group.posts
+                  .filter(
+                    (post: any) =>
+                      new Date(post.createdAt).getTime() >
+                      new Date().getTime() - 1000 * 60 * 60 * 24 * 7,
+                  )
+                  .map((post: any) => (
+                    <Marker
+                      key={post.location.id}
+                      coordinate={{
+                        latitude: post.location.latitude,
+                        longitude: post.location.longitude,
+                      }}
+                    >
+                      <Image
+                        className="w-8 h-8 rounded-sm border-gray-400 border-2"
+                        source={{ uri: post.frontImage }}
+                      />
+                    </Marker>
                   ))}
               </MapView>
             )}
@@ -185,11 +205,17 @@ const UserItem = ({ item, currentLocation }: any) => {
       <Text className="text-gray-500">
         {item.user.id === userId
           ? "You"
-          : item.user.location && currentLocation
+          : item.user.location.latitude &&
+            item.user.location.longitude &&
+            currentLocation?.latitude &&
+            currentLocation?.longitude
           ? distFrom([currentLocation.latitude, currentLocation.longitude])
-              .to([item.user.location.latitude, item.user.location.longitude])
+              .to([
+                item.user.location.latitude,
+                item.user.location.longitude + 0.0001,
+              ])
               .in("miles")
-              .toPrecision(2) + " mi"
+              .toFixed(1) + " mi"
           : "--"}
       </Text>
     </View>
