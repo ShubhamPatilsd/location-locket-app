@@ -46,7 +46,7 @@ model Group {
   code Int    @unique
 
   users GroupToUser[]
-  post  Post[]
+  posts Post[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
