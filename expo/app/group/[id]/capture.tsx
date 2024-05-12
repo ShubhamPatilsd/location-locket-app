@@ -1,10 +1,19 @@
+import { useAuth } from "@clerk/clerk-expo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { Camera, CameraCapturedPicture, CameraType } from "expo-camera";
+import axios from "axios";
+import {
+  CameraCapturedPicture,
+  CameraType,
+  CameraView,
+  useCameraPermissions,
+} from "expo-camera";
+import * as Location from "expo-location";
+import { useLocalSearchParams } from "expo-router";
+import FormData from "form-data";
 import { useEffect, useRef, useState } from "react";
 import {
   Image,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,20 +22,21 @@ import {
 } from "react-native";
 
 export default function CameraScreen() {
-  const [status, requestPermission] = Camera.useCameraPermissions();
-  const [type, setType] = useState(CameraType.back);
+  const [status, requestPermission] = useCameraPermissions();
+  const [type, setType] = useState<CameraType>("back");
   const [pictures, setPictures] = useState<
     Record<CameraType, CameraCapturedPicture | null>
-  >({
-    [CameraType.front]: null,
-    [CameraType.back]: null,
-  });
+  >({ back: null, front: null });
 
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<CameraView>(null);
   const { width, height } = useWindowDimensions();
   const otherPicture = pictures[otherSide()];
   const [cameraReady, setCameraReady] = useState(false);
   const [caption, setCaption] = useState("");
+
+  const { getToken } = useAuth();
+  const params = useLocalSearchParams();
+  const group = JSON.parse((params.group as string) || "{}");
 
   useEffect(() => {
     requestPermission();
@@ -37,75 +47,81 @@ export default function CameraScreen() {
   }
 
   function otherSide() {
-    if (type == CameraType.back) {
-      return CameraType.front;
+    if (type == "back") {
+      return "front" as CameraType;
     }
 
-    return CameraType.back;
+    return "back" as CameraType;
   }
 
   function swapCamera() {
     setType(otherSide());
   }
 
-  function submitPicture() {
-    // const post = {
-    //   id: posts.length,
-    //   user: {
-    //     handle: profile.handle,
-    //     profile: profile.profile,
-    //   },
-    //   likes: 0,
-    //   dislikes: 0,
-    //   location: {
-    //     city: profile.location.city,
-    //     state: profile.location.state,
-    //   },
-    //   image: {
-    //     front: pictures[CameraType.front].uri,
-    //     back: pictures[CameraType.back].uri,
-    //   },
-    // };
+  async function submitPicture() {
+    if (!pictures.front || !pictures.back) return;
 
-    return true;
+    const location = await Location.getCurrentPositionAsync({});
+    const token = await getToken();
+
+    return axios.post(
+      `${process.env.EXPO_PUBLIC_API_URL}/upload`,
+      {
+        groupId: group.id,
+        caption,
+        location: {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        },
+        front: {
+          raw: pictures.front.base64,
+          name: `front-${Date.now()}.jpg`,
+          type: `image/${pictures.front.uri.split(".").pop()}`,
+        },
+        back: {
+          raw: pictures.back.base64,
+          name: `back-${Date.now()}.jpg`,
+          type: `image/${pictures.back.uri.split(".").pop()}`,
+        },
+      },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
   }
 
   function hasBothPictures() {
-    return (
-      pictures[CameraType.front] !== null && pictures[CameraType.back] !== null
-    );
+    return pictures.front !== null && pictures.back !== null;
   }
 
   async function takePicture() {
     if (!cameraRef.current) return;
 
-    const picture = await cameraRef.current.takePictureAsync();
-    await cameraRef.current.resumePreview();
+    const picture = await cameraRef.current.takePictureAsync({ base64: true });
+    // await cameraRef.current.resumePreview();
     setCameraReady(false);
 
     setPictures({ ...pictures, [type]: picture });
 
     if (!otherPicture) swapCamera();
     else {
-      await cameraRef.current.pausePreview();
+      // await cameraRef.current.pausePreview();
     }
   }
 
   async function retakePictures() {
     if (!cameraRef.current) return;
 
-    setPictures({ [CameraType.front]: null, [CameraType.back]: null });
+    setPictures({ front: null, back: null });
     setCameraReady(true);
-    await cameraRef.current.resumePreview();
+    // await cameraRef.current.resumePreview();
   }
 
   return (
     <View className="flex items-center justify-center flex-1 p-4 gap-2">
-      <Camera
+      <CameraView
         onCameraReady={() => setCameraReady(true)}
         ref={cameraRef}
         className="w-11/12 h-5/6 rounded-md overflow-hidden"
-        type={type}
+        facing={type}
       >
         {otherPicture !== null && (
           <Image
@@ -133,7 +149,7 @@ export default function CameraScreen() {
         >
           <FontAwesome name="camera" size={35} color="white" />
         </TouchableOpacity>
-      </Camera>
+      </CameraView>
       <View className="flex flex-row justify-center items-center">
         <TextInput
           autoCapitalize="none"
